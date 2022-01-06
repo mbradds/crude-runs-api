@@ -5,6 +5,7 @@
   "scripts": {
     "test": "echo \"No tests yet...\""
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "@azure/cosmos": "^3.15.0"
+  }
 }
