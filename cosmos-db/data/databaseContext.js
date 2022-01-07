@@ -1,5 +1,5 @@
 const config = require("../config");
-const CosmosClient = require("@azure/cosmos").CosmosClient;
+// const CosmosClient = require("@azure/cosmos").CosmosClient;
 
 /*
 // This script ensures that the database is setup and populated correctly
@@ -20,10 +20,13 @@ async function create(client, databaseId, containerId) {
    */
   const { container } = await client
     .database(databaseId)
-    .containers.createIfNotExists(
-      { id: containerId, partitionKey },
-      { offerThroughput: 400 }
-    );
+    .containers.createIfNotExists({
+      id: containerId,
+      partitionKey: partitionKey,
+      // uniqueKeyPolicy: {
+      //   uniqueKeys: [{ paths: ["/id"] }],
+      // },
+    });
 
   console.log(`Created container:\n${container.id}\n`);
 }

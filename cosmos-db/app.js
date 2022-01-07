@@ -16,10 +16,15 @@ async function createAndConnect() {
 async function addData() {
   const data = await getCerData.getCerData();
   const cosmos = await createAndConnect();
-  const { resource: createdItem } = await cosmos.container.items.create(data);
-  console.log(
-    `\r\nCreated new item: ${createdItem.id} - ${createdItem.description}\r\n`
-  );
+  // await cosmos.container.delete();
+  try {
+    await Promise.all(
+      data.recordset.map((itemDef) => cosmos.container.items.upsert(itemDef))
+    );
+    console.log(data.recordset.length + " items created");
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 addData();
