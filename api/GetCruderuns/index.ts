@@ -8,7 +8,8 @@ const httpTrigger: AzureFunction = async function (
   let response;
 
   try {
-    let products = await cruderunService.read();
+    const region = req.params.region;
+    const products = await cruderunService.read(region);
     response = { body: products, status: 200 };
   } catch (err) {
     response = { body: err.message, status: 500 };

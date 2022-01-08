@@ -13,9 +13,12 @@ const cruderunService = {
       console.log(err.message);
     }
   },
-  async read(): Promise<string> {
+  async read(region): Promise<string> {
     const columns = `c.WeekEnd, c.WeekEndLastYr, c.RegionEN, c.RegionFR, c.Capacity, c.RunsForWeekEnding, c.PctCapUsed, c.FourWkAvg, c.FourWkAvgLastYr, c.YTDAvg, c.YTDAvgLastYr`;
-    const query = `select ${columns} from c`;
+    let query = `select ${columns} from c`;
+    if (region) {
+      query += ` where c.RegionEN = "${region}"`;
+    }
     const iterator = this.container.items.query(query);
     const { resources } = await iterator.fetchAll();
     return JSON.stringify(resources);
