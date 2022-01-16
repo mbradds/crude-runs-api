@@ -5,17 +5,21 @@ const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  let response;
-
   try {
     const region = req.params.region;
-    const products = await cruderunService.read(region);
-    response = { body: products, status: 200 };
-  } catch (err) {
-    response = { body: err.message, status: 500 };
-  }
+    const cols = req.query.cols;
 
-  context.res = response;
+    const products = await cruderunService().read(region, cols);
+    context.res = {
+      status: 200,
+      body: products,
+    };
+  } catch (err) {
+    context.res = {
+      status: 500,
+      body: JSON.stringify(err),
+    };
+  }
 };
 
 export default httpTrigger;
