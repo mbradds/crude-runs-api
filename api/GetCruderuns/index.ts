@@ -1,6 +1,11 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import cruderunService from "../services/cruderunsService";
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  return String(error);
+};
+
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
@@ -15,9 +20,10 @@ const httpTrigger: AzureFunction = async function (
       body: products,
     };
   } catch (err) {
+    //TODO: all errors bubble up here. Add custom errors to ../services/cruderunsService.ts for things like 404 not found, etc
     context.res = {
       status: 500,
-      body: JSON.stringify(err),
+      body: getErrorMessage(err),
     };
   }
 };

@@ -1,8 +1,27 @@
+/**
+ * API Documentation:
+ * GET Western Canada, all columns: http://localhost:7071/api/cruderuns/Western%20Canada
+ * GET Western Canada, some columns: http://localhost:7071/api/cruderuns/Western%20Canada?cols=[WeekEnd,Capacity,RunsForWeekEnding,PctCapUsed]
+ */
+
 import { Container, CosmosClient, Database } from "@azure/cosmos";
-import _ from "lodash";
 
 // Set connection string from CONNECTION_STRING value in local.settings.json
 const CONNECTION_STRING = process.env.CONNECTION_STRING;
+
+const allColumns = [
+  "WeekEnd",
+  "WeekEndLastYr",
+  "RegionEN",
+  "RegionFR",
+  "Capacity",
+  "RunsForWeekEnding",
+  "PctCapUsed",
+  "FourWkAvg",
+  "FourWkAvgLastYr",
+  "YTDAvg",
+  "YTDAvgLastYr",
+];
 
 const validateRegion = (region?: string) => {
   const possibleRegions = [
@@ -28,28 +47,16 @@ const validateRegion = (region?: string) => {
  * @returns array of invalid column names or empty array if valid
  */
 const columnErrors = (userEnteredCols: string[]) => {
-  const allColumns = [
-    "WeekEnd",
-    "WeekEndLastYr",
-    "RegionEN",
-    "RegionFR",
-    "Capacity",
-    "RunsForWeekEnding",
-    "PctCapUsed",
-    "FourWkAvg",
-    "FourWkAvgLastYr",
-    "YTDAvg",
-    "YTDAvgLastYr",
-  ];
-
-  return _.compact(
-    userEnteredCols.map((col) => {
+  return userEnteredCols
+    .map((col) => {
       if (allColumns.includes(col)) {
         return null;
       }
       return col;
     })
-  );
+    .filter(function (el) {
+      return el != null;
+    });
 };
 
 // TODO: Add column validation (potentially with joi)
@@ -61,12 +68,9 @@ const validateCols = (cols?: string) => {
 
   // String array to js array
   const colArray = cols.replace(/\[|\]/g, "").split(",");
-
-  // TODO: Rename
-  const errors = columnErrors(colArray);
-
-  if (errors.length >= 1) {
-    throw Error(`Columns ${JSON.stringify(errors)} not found`);
+  const notFoundCols = columnErrors(colArray);
+  if (notFoundCols.length >= 1) {
+    throw Error(`Columns ${JSON.stringify(notFoundCols)} not found`);
   }
 
   // Convert array to csv with `c.` prefix on members
@@ -80,7 +84,7 @@ const validateCols = (cols?: string) => {
  */
 const columnGenerator = (cols?: string) => {
   if (!cols) {
-    return `c.WeekEnd, c.WeekEndLastYr, c.RegionEN, c.RegionFR, c.Capacity, c.RunsForWeekEnding, c.PctCapUsed, c.FourWkAvg, c.FourWkAvgLastYr, c.YTDAvg, c.YTDAvgLastYr`;
+    return allColumns.map((col) => `c.${col}`).join();
   }
   return cols;
 };
@@ -113,7 +117,6 @@ export class CrudeRunsService {
     const validCols = validateCols(cols);
 
     const query = queryGenerator(validRegion, validCols);
-
     const iterator = this.container.items.query(query);
     const { resources } = await iterator.fetchAll();
     return JSON.stringify(resources);
