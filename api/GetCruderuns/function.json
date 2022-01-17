@@ -5,13 +5,26 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "methods": ["get"],
+      "methods": [
+        "get"
+      ],
       "route": "cruderuns/{region?}"
     },
     {
       "type": "http",
       "direction": "out",
       "name": "res"
+    },
+    {
+      "type": "cosmosDB",
+      "direction": "in",
+      "name": "inputDocument",
+      "databaseName": "cer-crude-runs",
+      "collectionName": "weekly-crude-runs",
+      "connectionStringSetting": "CONNECTION_STRING",
+      "id": "",
+      "partitionKey": "",
+      "sqlQuery": ""
     }
   ],
   "scriptFile": "../dist/GetCruderuns/index.js"
